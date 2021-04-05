@@ -1,6 +1,6 @@
-name:                hs-editable-list-with-observer-in-final-style-monad
+name:                hs-editable-list-with-observer-in-initial-style-monad
 version:             0.1.0.0
-github:              "githubuser/hs-editable-list-with-observer-in-final-style-monad"
+github:              "githubuser/hs-editable-list-with-observer-in-initial-style-monad"
 license:             BSD3
 author:              "Author name here"
 maintainer:          "example@example.com"
@@ -17,7 +17,7 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/hs-editable-list-with-observer-in-final-style-monad#readme>
+description:         Please see the README on GitHub at <https://github.com/githubuser/hs-editable-list-with-observer-in-initial-style-monad#readme>
 
 dependencies:
 - base >= 4.7 && < 5
@@ -29,7 +29,7 @@ library:
   source-dirs: src
 
 executables:
-  hs-editable-list-with-observer-in-final-style-monad-exe:
+  hs-editable-list-with-observer-in-initial-style-monad-exe:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
@@ -37,10 +37,10 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - hs-editable-list-with-observer-in-final-style-monad
+    - hs-editable-list-with-observer-in-initial-style-monad
 
 tests:
-  hs-editable-list-with-observer-in-final-style-monad-test:
+  hs-editable-list-with-observer-in-initial-style-monad-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
@@ -48,4 +48,4 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - hs-editable-list-with-observer-in-final-style-monad
+    - hs-editable-list-with-observer-in-initial-style-monad
