@@ -45,36 +45,6 @@ addDebugMessagesListener :: Monad m => ([String] -> m ()) -> AppStateListenersDa
 addDebugMessagesListener listener (AppStateListeners _rowsListeners _activeCellYListeners debugMessagesListeners) =
   AppStateListeners _rowsListeners _activeCellYListeners (listener:debugMessagesListeners)
 
--- class EditableListApp m where
---   getList :: m [RowData]
---   getActiveCellY :: m (Maybe Int)
---   getLogs :: m [String]
--- 
---   updateList :: [RowData] -> m ()
---   updateActiveCellY :: Maybe Int -> m ()
---   log :: String -> m ()
-
--- data EditableListOps m a = GetList                          (m [RowData]   -> EditableListOps m a)
---                          | GetActiveCellY                   (m (Maybe Int) -> EditableListOps m a)
---                          | GetLogs                          (m [String]    -> EditableListOps m a)
---                          | UpdateList           [RowData]   (m ()          -> EditableListOps m a)
---                          | UpdateActiveCellY    (Maybe Int) (m ()          -> EditableListOps m a)
---                          | Log                  String      (m ()          -> EditableListOps m a)
-
--- instance (Functor m) => Functor EditableListOps m a where
---   fmap f (GetList k) = GetList $ \listInFunctor -> fmap f listInFunctor
---   fmap f (GetActiveCellY k) = GetActiveCellY $ \maybeIntInFunctor -> fmap f maybeIntInFunctor
---   fmap f (GetLogs k) = GetLogs $ \logsInFunctor -> fmap f logsInFunctor
---   fmap f (UpdateList lst k) = UpdateList lst $ \ ???
-
--- data EditableListOps m a = GetList                          ([RowData]   -> EditableListOps m a)
---                          | GetActiveCellY                   ((Maybe Int) -> EditableListOps m a)
---                          | GetLogs                          ([String]    -> EditableListOps m a)
---                          | UpdateList           [RowData]   (EditableListOps m a)
---                          | UpdateActiveCellY    (Maybe Int) (EditableListOps m a)
---                          | Log                  String      (EditableListOps m a)
---                          | Done                 a
-
 data EditableListOps a = GetList                          ([RowData]   -> EditableListOps a)
                        | GetActiveCellY                   ((Maybe Int) -> EditableListOps a)
                        | GetLogs                          ([String]    -> EditableListOps a)
@@ -84,7 +54,6 @@ data EditableListOps a = GetList                          ([RowData]   -> Editab
 --                       | LiftIO               (IO ())     (EditableListOps a)
                        | Done                 a
 
---instance Functor (EditableListOps m) where
 instance Functor EditableListOps where
   fmap f (GetList k)              = GetList        $ \lst      -> fmap f (k lst)
   fmap f (GetActiveCellY k)       = GetActiveCellY $ \maybeInt -> fmap f (k maybeInt)
@@ -95,15 +64,8 @@ instance Functor EditableListOps where
 --  fmap f (LiftIO a op)            = LiftIO            a   (fmap f op)
   fmap f (Done a)                 = Done (f a)
 
---instance Applicative (EditableListOps m) where
 instance Applicative EditableListOps where
   pure = Done
---  (GetList h) <*> (GetList g) = GetList $ \lst ->
---                                             let f = h lst
---                                                 x = g lst
---                                              in f <*> x
---  (GetList h) <*> (GetActiveCellY g)
---  (GetList h) <*> op
 
   (GetList h)             <*> g = GetList        $ \lst  -> (h  lst) <*> g
   (GetActiveCellY h)      <*> g = GetActiveCellY $ \y    -> (h    y) <*> g
@@ -114,7 +76,6 @@ instance Applicative EditableListOps where
 --  (LiftIO a)              <*> g = LiftIO            a   (h <*> g)
   (Done a)                <*> g = fmap a g
 
---instance Monad (EditableListOps m) where
 instance Monad EditableListOps where
   return = Done
   (GetList h)             >>= f = GetList        $ \lst  -> (h  lst) >>= f
