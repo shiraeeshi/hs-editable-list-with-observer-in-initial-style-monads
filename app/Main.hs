@@ -122,16 +122,16 @@ interpret (GetLogs k) = do logs <- debugMessages <$> (Dict get)
                            interpret (k logs)
 interpret (UpdateList l k) = do Dict $ modify $ \s -> s { rows = l }
                                 reacts <- (rowsListeners . listeners) <$> (Dict get)
-                                forM_ reacts ($ l) -- forM_ reacts $ \react -> react l
+                                forM_ reacts ($ l) -- same as forM_ reacts $ \react -> react l
                                 interpret k
 interpret (UpdateActiveCellY y k) = do Dict $ modify $ \s -> s { activeCellY = y }
                                        reacts <- (activeCellYListeners . listeners) <$> (Dict get)
-                                       forM_ reacts ($ y) -- forM_ reacts $ \react -> react y
+                                       forM_ reacts ($ y) -- same as forM_ reacts $ \react -> react y
                                        interpret k
 interpret (Log msg k) = do Dict $ modify $ \s -> s { debugMessages = take debugLinesCount (msg:(debugMessages s)) }
                            logs <- debugMessages <$> (Dict get)
                            reacts <- (debugMessagesListeners . listeners) <$> (Dict get)
-                           forM_ reacts ($ logs) -- forM_ reacts $ \react -> react log
+                           forM_ reacts ($ logs) -- same as forM_ reacts $ \react -> react logs
                            interpret k
 interpret (LiftIO a k) = do v <- liftIO a
                             interpret (k v)
@@ -148,6 +148,7 @@ main = do
   hSetBuffering stdin NoBuffering
   hSetEcho stdin False
   clearScreen
+  --dictStateAction initialState (interpret (do ...))
   dictStateAction initialState $ interpret $ do
     initRows
     loop
