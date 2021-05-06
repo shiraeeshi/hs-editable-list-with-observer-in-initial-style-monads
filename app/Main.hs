@@ -110,34 +110,35 @@ instance MonadIO EditableListOps where
   -- liftIO a = LiftIO a $ \k -> return k
   liftIO a = LiftIO a return
 
-newtype DictStateHolder a = Dict (StateT (AppStateData DictStateHolder) IO a) deriving (Functor, Applicative, Monad, MonadIO)
+newtype StateHolder a = StateHolder (StateT (AppStateData StateHolder) IO a)
+  deriving (Functor, Applicative, Monad, MonadIO)
 
-interpret :: EditableListOps a -> DictStateHolder a
+interpret :: EditableListOps a -> StateHolder a
 interpret (Done x) = return x
-interpret (GetList k) = do lst <- rows <$> (Dict get)
+interpret (GetList k) = do lst <- rows <$> (StateHolder get)
                            interpret (k lst)
-interpret (GetActiveCellY k) = do y <- activeCellY <$> (Dict get)
+interpret (GetActiveCellY k) = do y <- activeCellY <$> (StateHolder get)
                                   interpret (k y)
-interpret (GetLogs k) = do logs <- debugMessages <$> (Dict get)
+interpret (GetLogs k) = do logs <- debugMessages <$> (StateHolder get)
                            interpret (k logs)
-interpret (UpdateList l k) = do Dict $ modify $ \s -> s { rows = l }
-                                reacts <- (rowsListeners . listeners) <$> (Dict get)
+interpret (UpdateList l k) = do StateHolder $ modify $ \s -> s { rows = l }
+                                reacts <- (rowsListeners . listeners) <$> (StateHolder get)
                                 forM_ reacts ($ l) -- same as forM_ reacts $ \react -> react l
                                 interpret k
-interpret (UpdateActiveCellY y k) = do Dict $ modify $ \s -> s { activeCellY = y }
-                                       reacts <- (activeCellYListeners . listeners) <$> (Dict get)
+interpret (UpdateActiveCellY y k) = do StateHolder $ modify $ \s -> s { activeCellY = y }
+                                       reacts <- (activeCellYListeners . listeners) <$> (StateHolder get)
                                        forM_ reacts ($ y) -- same as forM_ reacts $ \react -> react y
                                        interpret k
-interpret (Log msg k) = do Dict $ modify $ \s -> s { debugMessages = take debugLinesCount (msg:(debugMessages s)) }
-                           logs <- debugMessages <$> (Dict get)
-                           reacts <- (debugMessagesListeners . listeners) <$> (Dict get)
+interpret (Log msg k) = do StateHolder $ modify $ \s -> s { debugMessages = take debugLinesCount (msg:(debugMessages s)) }
+                           logs <- debugMessages <$> (StateHolder get)
+                           reacts <- (debugMessagesListeners . listeners) <$> (StateHolder get)
                            forM_ reacts ($ logs) -- same as forM_ reacts $ \react -> react logs
                            interpret k
 interpret (LiftIO a k) = do v <- liftIO a
                             interpret (k v)
 
-dictStateAction :: AppStateData DictStateHolder -> DictStateHolder a -> IO ()
-dictStateAction state (Dict action) = do
+dictStateAction :: AppStateData StateHolder -> StateHolder a -> IO ()
+dictStateAction state (StateHolder action) = do
   runStateT action state
   return ()
 
@@ -159,13 +160,13 @@ main = do
     columnWidth = 14
     rowCount = length initialRows
 
-    initialState :: AppStateData DictStateHolder
+    initialState :: AppStateData StateHolder
     initialState = AppState [] Nothing [] initListeners
 
     initRows :: EditableListOps ()
     initRows = updateList initialRows
 
-    initListeners :: AppStateListenersData DictStateHolder
+    initListeners :: AppStateListenersData StateHolder
     -- initListeners =
     --     addRowsListener (interpret . mainRowsListener)
     --     (addActiveCellYListener (interpret . activeCellYListener)
