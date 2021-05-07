@@ -4,7 +4,7 @@ module Main where
 
 import Control.Monad (when, forM_)
 import Control.Exception (try)
-import System.IO (stdin, hSetEcho, hSetBuffering, hReady, BufferMode (NoBuffering) )
+import System.IO (stdin, stdout, hSetEcho, hSetBuffering, hReady, BufferMode (NoBuffering) )
 import Control.Monad.State.Strict (StateT, get, modify, runStateT)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import qualified Data.Map as Map
@@ -147,6 +147,7 @@ debugLinesCount = 20
 main :: IO ()
 main = do
   hSetBuffering stdin NoBuffering
+  hSetBuffering stdout NoBuffering
   hSetEcho stdin False
   clearScreen
   --performStateAction initialState (interpret (do ...))
