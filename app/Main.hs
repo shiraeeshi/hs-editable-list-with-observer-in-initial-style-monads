@@ -137,8 +137,8 @@ interpret (Log msg k) = do StateHolder $ modify $ \s -> s { debugMessages = take
 interpret (LiftIO a k) = do v <- liftIO a
                             interpret (k v)
 
-dictStateAction :: AppStateData StateHolder -> StateHolder a -> IO ()
-dictStateAction state (StateHolder action) = do
+performStateAction :: AppStateData StateHolder -> StateHolder a -> IO ()
+performStateAction state (StateHolder action) = do
   runStateT action state
   return ()
 
@@ -149,8 +149,8 @@ main = do
   hSetBuffering stdin NoBuffering
   hSetEcho stdin False
   clearScreen
-  --dictStateAction initialState (interpret (do ...))
-  dictStateAction initialState $ interpret $ do
+  --performStateAction initialState (interpret (do ...))
+  performStateAction initialState $ interpret $ do
     initRows
     loop
   where
